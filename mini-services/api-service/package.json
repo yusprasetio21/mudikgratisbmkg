@@ -1,0 +1,13 @@
+{
+  "name": "korpri-bmkg-api",
+  "version": "1.0.0",
+  "description": "KORPRI BMKG API Service - Golang + MySQL",
+  "scripts": {
+    "dev": "go run cmd/api/main.go",
+    "build": "go build -o bin/api-service cmd/api/main.go",
+    "start": "./bin/api-service"
+  },
+  "devDependencies": {
+    "bun-types": "latest"
+  }
+}

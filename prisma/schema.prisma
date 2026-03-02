@@ -1,0 +1,34 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model MudikgratisSettings {
+  id              String   @id @default(cuid())
+  eventTitle      String   @default("MUDIK GRATIS KORPRI BMKG 2025")
+  eventActive     Boolean  @default(true)
+  showReregBanner Boolean  @default(true)
+  showBusCheckBanner Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model MudikgratisReregistration {
+  id              String   @id @default(cuid())
+  participantId    String
+  participantName  String
+  participantType  String
+  totalFamily     Int
+  dpAmount        String?
+  status          String   @default("pending")
+  reregistrationDate DateTime
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
