@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { signIn, useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -17,11 +17,32 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [isRedirecting, setIsRedirecting] = useState(false);
 
-  // Redirect if already logged in
-  if (status === 'authenticated') {
-    router.push('/admin');
-    return null;
+  // Redirect if already logged in - menggunakan useEffect
+  useEffect(() => {
+    if (status === 'authenticated' && !isRedirecting) {
+      setIsRedirecting(true);
+      router.push('/admin');
+    }
+  }, [status, router, isRedirecting]);
+
+  // Tampilkan loading saat redirect
+  if (status === 'authenticated' || isRedirecting) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center p-4">
+        <div className="text-center">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl mb-4 shadow-lg shadow-blue-500/30 animate-pulse">
+            <Shield className="w-8 h-8 text-white" />
+          </div>
+          <h2 className="text-xl font-semibold text-white mb-2">Mengalihkan ke Dashboard</h2>
+          <p className="text-slate-400">Harap tunggu sebentar...</p>
+          <div className="mt-4 flex justify-center">
+            <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   const handleSubmit = async (e: React.FormEvent) => {

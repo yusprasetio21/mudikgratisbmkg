@@ -9,8 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Plus, Trash2, User, Users, MapPin, Bus, CheckCircle, Calendar, X } from 'lucide-react';
+import { ArrowLeft, Plus, Trash2, User, Users, MapPin, Bus, CheckCircle, X } from 'lucide-react';
 
 interface FamilyMember {
   id: string;
@@ -109,10 +108,15 @@ export default function ASNRegistrationPage() {
       const response = await fetch('/api/mudikgratis/cities');
       if (response.ok) {
         const data = await response.json();
-        setCities(data.data || data);
+        // Pastikan data selalu array
+        const citiesData = data.data || data || [];
+        setCities(Array.isArray(citiesData) ? citiesData : []);
+      } else {
+        setCities([]);
       }
     } catch (error) {
       console.error('Error fetching cities:', error);
+      setCities([]);
     }
   };
 
@@ -121,10 +125,15 @@ export default function ASNRegistrationPage() {
       const response = await fetch(`/api/mudikgratis/buses?cityId=${cityId}`);
       if (response.ok) {
         const data = await response.json();
-        setBuses(data.data || data);
+        // Pastikan data selalu array
+        const busesData = data.data || data || [];
+        setBuses(Array.isArray(busesData) ? busesData : []);
+      } else {
+        setBuses([]);
       }
     } catch (error) {
       console.error('Error fetching buses:', error);
+      setBuses([]);
     }
   };
 
@@ -133,10 +142,15 @@ export default function ASNRegistrationPage() {
       const response = await fetch(`/api/mudikgratis/stops/city/${cityId}`);
       if (response.ok) {
         const data = await response.json();
-        setStops(data.data || data);
+        // Pastikan data selalu array
+        const stopsData = data.data || data || [];
+        setStops(Array.isArray(stopsData) ? stopsData : []);
+      } else {
+        setStops([]);
       }
     } catch (error) {
       console.error('Error fetching stops:', error);
+      setStops([]);
     }
   };
 
@@ -152,11 +166,17 @@ export default function ASNRegistrationPage() {
       const response = await fetch(`/api/asn-employees/search?q=${encodeURIComponent(query)}`);
       if (response.ok) {
         const data = await response.json();
-        setSearchResults(data.data || []);
+        const resultsData = data.data || data || [];
+        setSearchResults(Array.isArray(resultsData) ? resultsData : []);
         setShowSearchResults(true);
+      } else {
+        setSearchResults([]);
+        setShowSearchResults(false);
       }
     } catch (error) {
       console.error('Error searching employee:', error);
+      setSearchResults([]);
+      setShowSearchResults(false);
     } finally {
       setSearching(false);
     }
@@ -241,13 +261,13 @@ export default function ASNRegistrationPage() {
         },
         body: JSON.stringify({
           busId: selectedBus,
-          stopId: selectedStop,
+          stopId: selectedStop || null,
           participantType: 'ASN',
           name,
           nip,
-          phone,
-          address,
-          familyMembers,
+          phone: phone || null,
+          address: address || null,
+          familyMembers: familyMembers.length > 0 ? familyMembers : [],
         }),
       });
 
@@ -268,8 +288,17 @@ export default function ASNRegistrationPage() {
     }
   };
 
-  const selectedBusData = buses.find((b) => b.id === selectedBus);
+  // Pastikan buses adalah array sebelum menggunakan .find()
+  const selectedBusData = Array.isArray(buses) 
+    ? buses.find((b) => b.id === selectedBus) 
+    : undefined;
+  
   const totalPeople = 1 + familyMembers.length;
+
+  // Helper function untuk memastikan data adalah array
+  const safeCities = Array.isArray(cities) ? cities : [];
+  const safeBuses = Array.isArray(buses) ? buses : [];
+  const safeStops = Array.isArray(stops) ? stops : [];
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white py-8 px-4">
@@ -456,7 +485,7 @@ export default function ASNRegistrationPage() {
                     <SelectValue placeholder="Pilih kota tujuan" />
                   </SelectTrigger>
                   <SelectContent>
-                    {cities.map((city) => (
+                    {safeCities.map((city) => (
                       <SelectItem key={city.id} value={city.id}>
                         {city.name}, {city.province}
                       </SelectItem>
@@ -475,7 +504,7 @@ export default function ASNRegistrationPage() {
                       <SelectValue placeholder="Pilih bus" />
                     </SelectTrigger>
                     <SelectContent>
-                      {buses.map((bus) => (
+                      {safeBuses.map((bus) => (
                         <SelectItem
                           key={bus.id}
                           value={bus.id}
@@ -499,7 +528,7 @@ export default function ASNRegistrationPage() {
                       ))}
                     </SelectContent>
                   </Select>
-                  {buses.length === 0 && (
+                  {safeBuses.length === 0 && (
                     <p className="text-sm text-gray-500 mt-2">
                       Belum ada bus tersedia untuk kota ini
                     </p>
@@ -507,7 +536,7 @@ export default function ASNRegistrationPage() {
                 </div>
               )}
 
-              {selectedCity && stops.length > 0 && (
+              {selectedCity && safeStops.length > 0 && (
                 <div>
                   <Label htmlFor="stop">Kota Pemberhentian</Label>
                   <Select value={selectedStop} onValueChange={setSelectedStop}>
@@ -515,7 +544,7 @@ export default function ASNRegistrationPage() {
                       <SelectValue placeholder="Pilih kota pemberhentian" />
                     </SelectTrigger>
                     <SelectContent>
-                      {stops.map((stop) => (
+                      {safeStops.map((stop) => (
                         <SelectItem key={stop.id} value={stop.id}>
                           {stop.name}
                         </SelectItem>

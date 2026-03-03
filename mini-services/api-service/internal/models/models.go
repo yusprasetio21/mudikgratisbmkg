@@ -147,20 +147,20 @@ func (MudikBus) TableName() string {
 
 // MudikParticipant - Participant registration
 type MudikParticipant struct {
-        ID               string    `json:"id" gorm:"primaryKey;type:varchar(36)"`
-        BusID            string    `json:"busId" gorm:"column:bus_id;type:varchar(36);not null"`
-        StopID           string    `json:"stopId" gorm:"column:stop_id;type:varchar(36)"`
-        ParticipantType  string    `json:"participantType" gorm:"column:participant_type;type:varchar(20);not null"` // ASN or Non-ASN
-        Name             string    `json:"name" gorm:"type:varchar(255);not null"`
-        NIP              string    `json:"nip" gorm:"type:varchar(50)"`
-        Phone            string    `json:"phone" gorm:"type:varchar(20)"`
-        Address          string    `json:"address" gorm:"type:text"`
-        TotalFamily      int       `json:"totalFamily" gorm:"column:total_family;default:0"`
-        RegistrationDate time.Time `json:"registrationDate" gorm:"column:registration_date;autoCreateTime"`
-        Status           string    `json:"status" gorm:"type:varchar(20);default:'confirmed'"`
-        Notes            string    `json:"notes" gorm:"type:text"`
-        CreatedAt        time.Time `json:"createdAt" gorm:"autoCreateTime"`
-        UpdatedAt        time.Time `json:"updatedAt" gorm:"autoUpdateTime"`
+    ID               string    `json:"id" gorm:"primaryKey;type:varchar(36)"`
+    BusID            string    `json:"busId" gorm:"column:bus_id;type:varchar(36);not null"`
+    StopID           string    `json:"stopId" gorm:"column:stop_id;type:varchar(36)"`
+    ParticipantType  string    `json:"participantType" gorm:"column:participant_type;type:varchar(20);not null"`
+    Name             string    `json:"name" gorm:"type:varchar(255);not null"`
+    NIP              string    `json:"nip" gorm:"column:nip;type:varchar(50)"`  // ← INI YANG DIPERBAIKI
+    Phone            string    `json:"phone" gorm:"type:varchar(20)"`
+    Address          string    `json:"address" gorm:"type:text"`
+    TotalFamily      int       `json:"totalFamily" gorm:"column:total_family;default:0"`
+    RegistrationDate time.Time `json:"registrationDate" gorm:"column:registration_date;autoCreateTime"`
+    Status           string    `json:"status" gorm:"type:varchar(20);default:'confirmed'"`
+    Notes            string    `json:"notes" gorm:"type:text"`
+    CreatedAt        time.Time `json:"createdAt" gorm:"autoCreateTime"`
+    UpdatedAt        time.Time `json:"updatedAt" gorm:"autoUpdateTime"`
 }
 
 func (MudikParticipant) TableName() string {

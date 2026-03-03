@@ -121,6 +121,10 @@ export default function MudikGratisAdminPage() {
     eventActive: true,
     showReregBanner: true,
     showBusCheckBanner: true,
+    registrationOpenDate: '',
+    registrationCloseDate: '',
+    reregistrationOpenDate: '',
+    reregistrationCloseDate: '',
   });
 
   // Report data for sponsor proposal
@@ -135,6 +139,11 @@ export default function MudikGratisAdminPage() {
     cities: [],
   });
 
+  // Fetch cities saat komponen pertama kali dimuat
+  useEffect(() => {
+    fetchCities();
+  }, []);
+
   // Fetch settings from database
   const fetchSettings = async () => {
     try {
@@ -148,166 +157,178 @@ export default function MudikGratisAdminPage() {
     }
   };
 
+  // Fetch data based on active tab
   useEffect(() => {
-    // Always fetch settings first
-    fetchSettings();
+    const loadData = async () => {
+      setLoading(true);
+      try {
+        // Always fetch settings first
+        await fetchSettings();
 
-    if (activeTab === 'dashboard') fetchSummary();
-    else if (activeTab === 'cities') fetchCities();
-    else if (activeTab === 'buses') fetchBuses();
-    else if (activeTab === 'participants') fetchParticipants();
-    else if (activeTab === 'verification') {
-      fetchParticipants();
-      // Simulated reregistrations data
-      setReregistrations([
-        {
-          id: 'RR-001',
-          participantId: 'P-001',
-          participantName: 'Ahmad Fauzi',
-          participantType: 'ASN',
-          totalFamily: 2,
-          reregistrationDate: new Date().toISOString(),
-          status: 'pending',
-          dpAmount: null,
-        },
-        {
-          id: 'RR-002',
-          participantId: 'P-002',
-          participantName: 'Siti Nurhaliza',
-          participantType: 'Non-ASN',
-          totalFamily: 1,
-          reregistrationDate: new Date(Date.now() - 86400000).toISOString(),
-          status: 'pending',
-          dpAmount: null,
-        },
-        {
-          id: 'RR-003',
-          participantId: 'P-003',
-          participantName: 'Budi Santoso',
-          participantType: 'ASN',
-          totalFamily: 3,
-          reregistrationDate: new Date(Date.now() - 172800000).toISOString(),
-          status: 'approved',
-          dpAmount: '500000',
-        },
-      ]);
-    } else if (activeTab === 'seats') {
-      // Add print styles
-      if (!document.getElementById('print-styles')) {
-        const style = document.createElement('style');
-        style.id = 'print-styles';
-        style.textContent = `
-          @media print {
-            .no-print { display: none !important; }
-            body { background: white; }
-            .page-break { page-break-before: always; }
-            @page { size: A4; margin: 1.5cm; }
-          }
-        `;
-        document.head.appendChild(style);
-      }
-
-      // Simulated seat allocation data
-      setSeatAllocations([
-        {
-          id: 'B-001',
-          busNumber: 'B-001',
-          cityId: 'C-001',
-          cityName: 'Semarang',
-          capacity: 40,
-          participants: [
+        if (activeTab === 'dashboard') await fetchSummary();
+        else if (activeTab === 'cities') await fetchCities();
+        else if (activeTab === 'buses') await fetchBuses();
+        else if (activeTab === 'participants') await fetchParticipants();
+        else if (activeTab === 'verification') {
+          await fetchParticipants();
+          // Simulated reregistrations data
+          setReregistrations([
             {
+              id: 'RR-001',
               participantId: 'P-001',
-              name: 'Ahmad Fauzi',
-              familyMembers: 2,
-              seats: ['A-1', 'A-2', 'A-3'],
-              status: 'approved',
+              participantName: 'Ahmad Fauzi',
+              participantType: 'ASN',
+              totalFamily: 2,
+              reregistrationDate: new Date().toISOString(),
+              status: 'pending',
+              dpAmount: null,
             },
             {
+              id: 'RR-002',
               participantId: 'P-002',
-              name: 'Siti Nurhaliza',
-              familyMembers: 1,
-              seats: ['A-4', 'A-5'],
-              status: 'approved',
+              participantName: 'Siti Nurhaliza',
+              participantType: 'Non-ASN',
+              totalFamily: 1,
+              reregistrationDate: new Date(Date.now() - 86400000).toISOString(),
+              status: 'pending',
+              dpAmount: null,
             },
             {
+              id: 'RR-003',
               participantId: 'P-003',
-              name: 'Budi Santoso',
-              familyMembers: 3,
-              seats: ['A-6', 'A-7', 'A-8', 'A-9'],
+              participantName: 'Budi Santoso',
+              participantType: 'ASN',
+              totalFamily: 3,
+              reregistrationDate: new Date(Date.now() - 172800000).toISOString(),
               status: 'approved',
+              dpAmount: '500000',
+            },
+          ]);
+        } else if (activeTab === 'seats') {
+          // Add print styles
+          if (!document.getElementById('print-styles')) {
+            const style = document.createElement('style');
+            style.id = 'print-styles';
+            style.textContent = `
+              @media print {
+                .no-print { display: none !important; }
+                body { background: white; }
+                .page-break { page-break-before: always; }
+                @page { size: A4; margin: 1.5cm; }
+              }
+            `;
+            document.head.appendChild(style);
+          }
+
+          // Simulated seat allocation data
+          setSeatAllocations([
+            {
+              id: 'B-001',
+              busNumber: 'B-001',
+              cityId: 'C-001',
+              cityName: 'Semarang',
+              capacity: 40,
+              participants: [
+                {
+                  participantId: 'P-001',
+                  name: 'Ahmad Fauzi',
+                  familyMembers: 2,
+                  seats: ['A-1', 'A-2', 'A-3'],
+                  status: 'approved',
+                },
+                {
+                  participantId: 'P-002',
+                  name: 'Siti Nurhaliza',
+                  familyMembers: 1,
+                  seats: ['A-4', 'A-5'],
+                  status: 'approved',
+                },
+                {
+                  participantId: 'P-003',
+                  name: 'Budi Santoso',
+                  familyMembers: 3,
+                  seats: ['A-6', 'A-7', 'A-8', 'A-9'],
+                  status: 'approved',
+                },
+                {
+                  participantId: 'P-004',
+                  name: 'Dewi Sartika',
+                  familyMembers: 0,
+                  seats: ['A-10'],
+                  status: 'approved',
+                },
+                {
+                  participantId: 'P-005',
+                  name: 'Eko Prasetyo',
+                  familyMembers: 2,
+                  seats: ['A-11', 'A-12', 'A-13'],
+                  status: 'approved',
+                },
+              ],
             },
             {
-              participantId: 'P-004',
-              name: 'Dewi Sartika',
-              familyMembers: 0,
-              seats: ['A-10'],
-              status: 'approved',
+              id: 'B-002',
+              busNumber: 'B-002',
+              cityId: 'C-001',
+              cityName: 'Semarang',
+              capacity: 40,
+              participants: [
+                {
+                  participantId: 'P-006',
+                  name: 'Fatimah Azzahra',
+                  familyMembers: 1,
+                  seats: ['A-1', 'A-2'],
+                  status: 'approved',
+                },
+                {
+                  participantId: 'P-007',
+                  name: 'Gunawan Wibisono',
+                  familyMembers: 0,
+                  seats: ['A-3'],
+                  status: 'approved',
+                },
+              ],
             },
             {
-              participantId: 'P-005',
-              name: 'Eko Prasetyo',
-              familyMembers: 2,
-              seats: ['A-11', 'A-12', 'A-13'],
-              status: 'approved',
-            },
-          ],
-        },
-        {
-          id: 'B-002',
-          busNumber: 'B-002',
-          cityId: 'C-001',
-          cityName: 'Semarang',
-          capacity: 40,
-          participants: [
-            {
-              participantId: 'P-006',
-              name: 'Fatimah Azzahra',
-              familyMembers: 1,
-              seats: ['A-1', 'A-2'],
-              status: 'approved',
+              id: 'B-003',
+              busNumber: 'B-003',
+              cityId: 'C-002',
+              cityName: 'Surabaya',
+              capacity: 40,
+              participants: [
+                {
+                  participantId: 'P-008',
+                  name: 'Haryanto Putra',
+                  familyMembers: 2,
+                  seats: ['A-1', 'A-2', 'A-3'],
+                  status: 'approved',
+                },
+              ],
             },
             {
-              participantId: 'P-007',
-              name: 'Gunawan Wibisono',
-              familyMembers: 0,
-              seats: ['A-3'],
-              status: 'approved',
+              id: 'B-004',
+              busNumber: 'B-004',
+              cityId: 'C-003',
+              cityName: 'Yogyakarta',
+              capacity: 40,
+              participants: [],
             },
-          ],
-        },
-        {
-          id: 'B-003',
-          busNumber: 'B-003',
-          cityId: 'C-002',
-          cityName: 'Surabaya',
-          capacity: 40,
-          participants: [
-            {
-              participantId: 'P-008',
-              name: 'Haryanto Putra',
-              familyMembers: 2,
-              seats: ['A-1', 'A-2', 'A-3'],
-              status: 'approved',
-            },
-          ],
-        },
-        {
-          id: 'B-004',
-          busNumber: 'B-004',
-          cityId: 'C-003',
-          cityName: 'Yogyakarta',
-          capacity: 40,
-          participants: [],
-        },
-      ]);
-    } else if (activeTab === 'report') {
-      // Auto-generate report when tab is active
-      handleGenerateReport();
-    } else if (activeTab === 'settings') {
-      // Fetch fresh settings when entering settings tab
-      fetchSettings();
-    }
+          ]);
+        } else if (activeTab === 'report') {
+          // Auto-generate report when tab is active
+          await handleGenerateReport();
+        } else if (activeTab === 'settings') {
+          // Fetch fresh settings when entering settings tab
+          await fetchSettings();
+        }
+      } catch (error) {
+        console.error('Error loading data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadData();
   }, [activeTab]);
 
   // Inject toast animation styles
@@ -331,7 +352,8 @@ export default function MudikGratisAdminPage() {
     `;
     document.head.appendChild(style);
     return () => {
-      style.remove();
+      const styleElement = document.getElementById('toast-animations');
+      if (styleElement) styleElement.remove();
     };
   }, []);
 
@@ -359,10 +381,17 @@ export default function MudikGratisAdminPage() {
       const response = await fetch('/api/mudikgratis/cities');
       if (response.ok) {
         const data = await response.json();
-        setCities(data.data || data);
+        // Pastikan data selalu array
+        const citiesData = data.data || data || [];
+        setCities(Array.isArray(citiesData) ? citiesData : []);
+        console.log('Cities loaded:', citiesData); // Untuk debugging
+      } else {
+        console.error('Failed to fetch cities:', response.status);
+        setCities([]);
       }
     } catch (error) {
       console.error('Error fetching cities:', error);
+      setCities([]);
     }
   };
 
@@ -371,10 +400,14 @@ export default function MudikGratisAdminPage() {
       const response = await fetch('/api/mudikgratis/buses');
       if (response.ok) {
         const data = await response.json();
-        setBuses(data.data || data);
+        const busesData = data.data || data || [];
+        setBuses(Array.isArray(busesData) ? busesData : []);
+      } else {
+        setBuses([]);
       }
     } catch (error) {
       console.error('Error fetching buses:', error);
+      setBuses([]);
     }
   };
 
@@ -383,10 +416,14 @@ export default function MudikGratisAdminPage() {
       const response = await fetch('/api/mudikgratis/participants');
       if (response.ok) {
         const data = await response.json();
-        setParticipants(data.data || data);
+        const participantsData = data.data || data || [];
+        setParticipants(Array.isArray(participantsData) ? participantsData : []);
+      } else {
+        setParticipants([]);
       }
     } catch (error) {
       console.error('Error fetching participants:', error);
+      setParticipants([]);
     }
   };
 
@@ -409,7 +446,7 @@ export default function MudikGratisAdminPage() {
       if (response.ok) {
         showMessage('success', editingCity ? 'Kota berhasil diperbarui' : 'Kota berhasil ditambahkan');
         resetCityForm();
-        fetchCities();
+        await fetchCities();
       } else {
         const error = await response.json();
         showMessage('error', error.error || 'Gagal menyimpan kota');
@@ -431,7 +468,7 @@ export default function MudikGratisAdminPage() {
 
       if (response.ok) {
         showMessage('success', 'Kota berhasil dihapus');
-        fetchCities();
+        await fetchCities();
       } else {
         showMessage('error', 'Gagal menghapus kota');
       }
@@ -444,6 +481,31 @@ export default function MudikGratisAdminPage() {
     setCityFormData({ name: '', province: '', description: '' });
     setEditingCity(null);
     setShowCityForm(false);
+  };
+
+  // Fungsi untuk membuka form bus
+  const handleOpenBusForm = () => {
+    // Fetch cities terlebih dahulu sebelum membuka form
+    fetchCities().then(() => {
+      setShowBusForm(true);
+    });
+  };
+
+  // Fungsi untuk edit bus
+  const handleEditBus = (bus: Bus) => {
+    // Fetch cities terlebih dahulu sebelum membuka form edit
+    fetchCities().then(() => {
+      setEditingBus(bus);
+      setBusFormData({
+        busNumber: bus.busNumber,
+        plateNumber: bus.plateNumber,
+        cityId: bus.cityId,
+        capacity: bus.capacity,
+        description: bus.description,
+        departureDate: bus.departureDate || '',
+      });
+      setShowBusForm(true);
+    });
   };
 
   // Bus functions
@@ -465,7 +527,7 @@ export default function MudikGratisAdminPage() {
       if (response.ok) {
         showMessage('success', editingBus ? 'Bus berhasil diperbarui' : 'Bus berhasil ditambahkan');
         resetBusForm();
-        fetchBuses();
+        await fetchBuses();
       } else {
         const error = await response.json();
         showMessage('error', error.error || 'Gagal menyimpan bus');
@@ -487,7 +549,7 @@ export default function MudikGratisAdminPage() {
 
       if (response.ok) {
         showMessage('success', 'Bus berhasil dihapus');
-        fetchBuses();
+        await fetchBuses();
       } else {
         showMessage('error', 'Gagal menghapus bus');
       }
@@ -520,7 +582,7 @@ export default function MudikGratisAdminPage() {
 
       if (response.ok) {
         showMessage('success', 'Peserta berhasil dihapus');
-        fetchParticipants();
+        await fetchParticipants();
         setSelectedParticipant(null);
       } else {
         showMessage('error', 'Gagal menghapus peserta');
@@ -717,16 +779,21 @@ export default function MudikGratisAdminPage() {
         }
       }
 
+      // Ensure data is array
+      const participantsArray = Array.isArray(participants.data) ? participants.data : [];
+      const citiesArray = Array.isArray(cities.data) ? cities.data : [];
+      const busesArray = Array.isArray(buses.data) ? buses.data : [];
+
       // Calculate report data
-      const totalParticipants = participants.data?.length || 0;
-      const totalASNs = participants.data?.filter((p: any) => p.participantType === 'ASN').length || 0;
-      const totalNonASNs = participants.data?.filter((p: any) => p.participantType === 'Non-ASN').length || 0;
-      const totalBuses = buses.data?.length || 0;
+      const totalParticipants = participantsArray.length || 0;
+      const totalASNs = participantsArray.filter((p: any) => p.participantType === 'ASN').length || 0;
+      const totalNonASNs = participantsArray.filter((p: any) => p.participantType === 'Non-ASN').length || 0;
+      const totalBuses = busesArray.length || 0;
 
       // Group participants by city
-      const citiesWithParticipants = (cities.data || []).map((city: any) => {
-        const cityParticipants = (participants.data || []).filter((p: any) => p.cityId === city.id);
-        const cityBuses = (buses.data || []).filter((b: any) => b.cityId === city.id);
+      const citiesWithParticipants = citiesArray.map((city: any) => {
+        const cityParticipants = participantsArray.filter((p: any) => p.cityId === city.id);
+        const cityBuses = busesArray.filter((b: any) => b.cityId === city.id);
         const cityASNs = cityParticipants.filter((p: any) => p.participantType === 'ASN').length;
         const cityNonASNs = cityParticipants.filter((p: any) => p.participantType === 'Non-ASN').length;
         
@@ -755,10 +822,10 @@ export default function MudikGratisAdminPage() {
         totalParticipants,
         totalASNs,
         totalNonASNs,
-        totalCities: cities.data?.length || 0,
+        totalCities: citiesArray.length || 0,
         totalBuses,
-        totalAvailable: buses.data?.reduce((acc: any, b: any) => acc + (b.available || 0), 0),
-        totalBooked: buses.data?.reduce((acc: any, b: any) => acc + ((b.capacity || 0) - (b.available || 0)), 0),
+        totalAvailable: busesArray.reduce((acc: any, b: any) => acc + (b.available || 0), 0),
+        totalBooked: busesArray.reduce((acc: any, b: any) => acc + ((b.capacity || 0) - (b.available || 0)), 0),
         cities: citiesWithParticipants,
       });
 
@@ -931,42 +998,50 @@ export default function MudikGratisAdminPage() {
                           </TableRow>
                         </TableHeader>
                         <TableBody>
-                          {cities.map((city) => (
-                            <TableRow key={city.id}>
-                              <TableCell className="font-medium">{city.name}</TableCell>
-                              <TableCell>{city.province}</TableCell>
-                              <TableCell>
-                                <Badge variant={city.isActive ? 'default' : 'secondary'}>
-                                  {city.isActive ? 'Aktif' : 'Nonaktif'}
-                                </Badge>
-                              </TableCell>
-                              <TableCell className="text-right">
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => {
-                                    setEditingCity(city);
-                                    setCityFormData({
-                                      name: city.name,
-                                      province: city.province,
-                                      description: city.description,
-                                    });
-                                    setShowCityForm(true);
-                                  }}
-                                >
-                                  <Edit className="h-4 w-4" />
-                                </Button>
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => handleCityDelete(city.id)}
-                                  className="text-red-600 hover:text-red-800"
-                                >
-                                  <Trash2 className="h-4 w-4" />
-                                </Button>
+                          {Array.isArray(cities) && cities.length > 0 ? (
+                            cities.map((city) => (
+                              <TableRow key={city.id}>
+                                <TableCell className="font-medium">{city.name}</TableCell>
+                                <TableCell>{city.province}</TableCell>
+                                <TableCell>
+                                  <Badge variant={city.isActive ? 'default' : 'secondary'}>
+                                    {city.isActive ? 'Aktif' : 'Nonaktif'}
+                                  </Badge>
+                                </TableCell>
+                                <TableCell className="text-right">
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => {
+                                      setEditingCity(city);
+                                      setCityFormData({
+                                        name: city.name,
+                                        province: city.province,
+                                        description: city.description,
+                                      });
+                                      setShowCityForm(true);
+                                    }}
+                                  >
+                                    <Edit className="h-4 w-4" />
+                                  </Button>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => handleCityDelete(city.id)}
+                                    className="text-red-600 hover:text-red-800"
+                                  >
+                                    <Trash2 className="h-4 w-4" />
+                                  </Button>
+                                </TableCell>
+                              </TableRow>
+                            ))
+                          ) : (
+                            <TableRow>
+                              <TableCell colSpan={4} className="text-center py-8 text-gray-500">
+                                {loading ? 'Memuat data...' : 'Belum ada data kota'}
                               </TableCell>
                             </TableRow>
-                          ))}
+                          )}
                         </TableBody>
                       </Table>
                     </div>
@@ -1021,7 +1096,7 @@ export default function MudikGratisAdminPage() {
               <CardContent>
                 {!showBusForm ? (
                   <div className="space-y-4">
-                    <Button onClick={() => setShowBusForm(true)} className="gap-2">
+                    <Button onClick={handleOpenBusForm} className="gap-2">
                       <Plus className="h-4 w-4" />
                       Tambah Bus Baru
                     </Button>
@@ -1039,52 +1114,49 @@ export default function MudikGratisAdminPage() {
                           </TableRow>
                         </TableHeader>
                         <TableBody>
-                          {buses.map((bus) => (
-                            <TableRow key={bus.id}>
-                              <TableCell className="font-medium">{bus.busNumber}</TableCell>
-                              <TableCell>{bus.plateNumber || '-'}</TableCell>
-                              <TableCell>{bus.cityName || '-'}</TableCell>
-                              <TableCell>{bus.capacity}</TableCell>
-                              <TableCell>
-                                <Badge variant={bus.available > 0 ? 'default' : 'destructive'}>
-                                  {bus.available}
-                                </Badge>
-                              </TableCell>
-                              <TableCell>
-                                <Badge variant={bus.isActive ? 'default' : 'secondary'}>
-                                  {bus.isActive ? 'Aktif' : 'Nonaktif'}
-                                </Badge>
-                              </TableCell>
-                              <TableCell className="text-right">
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => {
-                                    setEditingBus(bus);
-                                    setBusFormData({
-                                      busNumber: bus.busNumber,
-                                      plateNumber: bus.plateNumber,
-                                      cityId: bus.cityId,
-                                      capacity: bus.capacity,
-                                      description: bus.description,
-                                      departureDate: bus.departureDate || '',
-                                    });
-                                    setShowBusForm(true);
-                                  }}
-                                >
-                                  <Edit className="h-4 w-4" />
-                                </Button>
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => handleBusDelete(bus.id)}
-                                  className="text-red-600 hover:text-red-800"
-                                >
-                                  <Trash2 className="h-4 w-4" />
-                                </Button>
+                          {Array.isArray(buses) && buses.length > 0 ? (
+                            buses.map((bus) => (
+                              <TableRow key={bus.id}>
+                                <TableCell className="font-medium">{bus.busNumber}</TableCell>
+                                <TableCell>{bus.plateNumber || '-'}</TableCell>
+                                <TableCell>{bus.cityName || '-'}</TableCell>
+                                <TableCell>{bus.capacity}</TableCell>
+                                <TableCell>
+                                  <Badge variant={bus.available > 0 ? 'default' : 'destructive'}>
+                                    {bus.available}
+                                  </Badge>
+                                </TableCell>
+                                <TableCell>
+                                  <Badge variant={bus.isActive ? 'default' : 'secondary'}>
+                                    {bus.isActive ? 'Aktif' : 'Nonaktif'}
+                                  </Badge>
+                                </TableCell>
+                                <TableCell className="text-right">
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => handleEditBus(bus)}
+                                  >
+                                    <Edit className="h-4 w-4" />
+                                  </Button>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => handleBusDelete(bus.id)}
+                                    className="text-red-600 hover:text-red-800"
+                                  >
+                                    <Trash2 className="h-4 w-4" />
+                                  </Button>
+                                </TableCell>
+                              </TableRow>
+                            ))
+                          ) : (
+                            <TableRow>
+                              <TableCell colSpan={7} className="text-center py-8 text-gray-500">
+                                {loading ? 'Memuat data...' : 'Belum ada data bus'}
                               </TableCell>
                             </TableRow>
-                          ))}
+                          )}
                         </TableBody>
                       </Table>
                     </div>
@@ -1115,14 +1187,25 @@ export default function MudikGratisAdminPage() {
                         onValueChange={(value) => setBusFormData({ ...busFormData, cityId: value })}
                       >
                         <SelectTrigger>
-                          <SelectValue placeholder="Pilih kota" />
+                          <SelectValue placeholder={cities.length === 0 ? "Memuat kota..." : "Pilih kota"} />
                         </SelectTrigger>
                         <SelectContent>
-                          {cities.map((city) => (
-                            <SelectItem key={city.id} value={city.id}>
-                              {city.name}, {city.province}
-                            </SelectItem>
-                          ))}
+                          {cities.length === 0 ? (
+                            <div className="flex items-center justify-center p-4">
+                              <div className="w-5 h-5 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                              <span className="ml-2 text-sm text-gray-500">Memuat data kota...</span>
+                            </div>
+                          ) : Array.isArray(cities) && cities.length > 0 ? (
+                            cities.map((city) => (
+                              <SelectItem key={city.id} value={city.id}>
+                                {city.name}, {city.province}
+                              </SelectItem>
+                            ))
+                          ) : (
+                            <div className="p-4 text-center text-sm text-gray-500">
+                              Belum ada data kota. Silakan tambah kota terlebih dahulu.
+                            </div>
+                          )}
                         </SelectContent>
                       </Select>
                     </div>
@@ -1190,42 +1273,50 @@ export default function MudikGratisAdminPage() {
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {participants.map((participant) => (
-                          <TableRow
-                            key={participant.id}
-                            className="cursor-pointer hover:bg-gray-50"
-                            onClick={() => setSelectedParticipant(participant)}
-                          >
-                            <TableCell className="font-medium">{participant.name}</TableCell>
-                            <TableCell>
-                              <Badge variant={participant.participantType === 'ASN' ? 'default' : 'secondary'}>
-                                {participant.participantType}
-                              </Badge>
-                            </TableCell>
-                            <TableCell>{participant.totalFamily} orang</TableCell>
-                            <TableCell>
-                              {new Date(participant.registrationDate).toLocaleDateString('id-ID')}
-                            </TableCell>
-                            <TableCell>
-                              <Badge variant={participant.status === 'confirmed' ? 'default' : 'secondary'}>
-                                {participant.status}
-                              </Badge>
-                            </TableCell>
-                            <TableCell className="text-right">
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleParticipantDelete(participant.id);
-                                }}
-                                className="text-red-600 hover:text-red-800"
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
+                        {Array.isArray(participants) && participants.length > 0 ? (
+                          participants.map((participant) => (
+                            <TableRow
+                              key={participant.id}
+                              className="cursor-pointer hover:bg-gray-50"
+                              onClick={() => setSelectedParticipant(participant)}
+                            >
+                              <TableCell className="font-medium">{participant.name}</TableCell>
+                              <TableCell>
+                                <Badge variant={participant.participantType === 'ASN' ? 'default' : 'secondary'}>
+                                  {participant.participantType}
+                                </Badge>
+                              </TableCell>
+                              <TableCell>{participant.totalFamily} orang</TableCell>
+                              <TableCell>
+                                {participant.registrationDate ? new Date(participant.registrationDate).toLocaleDateString('id-ID') : '-'}
+                              </TableCell>
+                              <TableCell>
+                                <Badge variant={participant.status === 'approved' ? 'default' : 'secondary'}>
+                                  {participant.status === 'approved' ? 'Disetujui' : participant.status || 'Pending'}
+                                </Badge>
+                              </TableCell>
+                              <TableCell className="text-right">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleParticipantDelete(participant.id);
+                                  }}
+                                  className="text-red-600 hover:text-red-800"
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </TableCell>
+                            </TableRow>
+                          ))
+                        ) : (
+                          <TableRow>
+                            <TableCell colSpan={6} className="text-center py-8 text-gray-500">
+                              {loading ? 'Memuat data...' : 'Belum ada data peserta'}
                             </TableCell>
                           </TableRow>
-                        ))}
+                        )}
                       </TableBody>
                     </Table>
                   </div>
@@ -1275,18 +1366,18 @@ export default function MudikGratisAdminPage() {
                     <div>
                       <Label className="text-gray-600">Tanggal Pendaftaran</Label>
                       <p className="font-medium">
-                        {new Date(selectedParticipant.registrationDate).toLocaleString('id-ID')}
+                        {selectedParticipant.registrationDate ? new Date(selectedParticipant.registrationDate).toLocaleString('id-ID') : '-'}
                       </p>
                     </div>
                     <div>
                       <Label className="text-gray-600">Total Peserta</Label>
-                      <p className="font-medium">{1 + selectedParticipant.totalFamily} orang</p>
+                      <p className="font-medium">{1 + (selectedParticipant.totalFamily || 0)} orang</p>
                     </div>
                     {selectedParticipant.totalFamily > 0 && (
                       <div className="border-t pt-4 mt-4">
                         <Label className="text-gray-600 mb-2 block">Anggota Keluarga</Label>
                         <div className="space-y-2 text-sm">
-                          {selectedParticipant.familyMembers?.map((fm: any, idx: number) => (
+                          {Array.isArray(selectedParticipant.familyMembers) && selectedParticipant.familyMembers.map((fm: any, idx: number) => (
                             <div key={fm.id || idx} className="bg-gray-50 p-2 rounded">
                               <div className="font-medium">{fm.name}</div>
                               <div className="text-gray-600">{fm.relationship}</div>
@@ -1353,14 +1444,14 @@ export default function MudikGratisAdminPage() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {reregistrations.filter(r => r.status === 'pending').length === 0 ? (
+                      {Array.isArray(reregistrations) && reregistrations.filter(r => r.status === 'pending').length === 0 ? (
                         <TableRow>
                           <TableCell colSpan={7} className="text-center text-gray-500 py-8">
                             Tidak ada daftar ulang yang perlu diverifikasi
                           </TableCell>
                         </TableRow>
                       ) : (
-                        reregistrations.filter(r => r.status === 'pending').map((rereg) => (
+                        Array.isArray(reregistrations) && reregistrations.filter(r => r.status === 'pending').map((rereg) => (
                           <TableRow key={rereg.id}>
                             <TableCell className="font-medium">{rereg.participantName}</TableCell>
                             <TableCell>
@@ -1370,7 +1461,7 @@ export default function MudikGratisAdminPage() {
                             </TableCell>
                             <TableCell>{rereg.totalFamily + 1} orang</TableCell>
                             <TableCell>
-                              {new Date(rereg.reregistrationDate).toLocaleDateString('id-ID')}
+                              {rereg.reregistrationDate ? new Date(rereg.reregistrationDate).toLocaleDateString('id-ID') : '-'}
                             </TableCell>
                             <TableCell>
                               <Badge variant="secondary">Pending</Badge>
@@ -1669,9 +1760,8 @@ export default function MudikGratisAdminPage() {
                                 cx="50%"
                                 cy="50%"
                                 labelLine={false}
-                                label={({ name, percent }) => `${name}: ${percent}%`}
+                                label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
                               >
-                                <Label content="value" position="outside" className="text-xs text-gray-600" />
                                 <Tooltip />
                               </Pie>
                             </PieChart>
@@ -1698,7 +1788,6 @@ export default function MudikGratisAdminPage() {
                                 name="Jumlah Peserta"
                                 radius={[4, 4, 0, 0]}
                               />
-                              <Tooltip />
                             </BarChart>
                           </ResponsiveContainer>
                         </div>
@@ -1723,7 +1812,6 @@ export default function MudikGratisAdminPage() {
                                 name="Jumlah Bus"
                                 radius={[4, 4, 0, 0]}
                               />
-                              <Tooltip />
                             </BarChart>
                           </ResponsiveContainer>
                         </div>
@@ -1734,7 +1822,7 @@ export default function MudikGratisAdminPage() {
 
                 {/* Halaman 2: Detail Peserta per Kota */}
                 <div className="space-y-4 page-break-before-always">
-                  {reportData.cities.map((city: any, cityIndex: number) => (
+                  {Array.isArray(reportData.cities) && reportData.cities.map((city: any, cityIndex: number) => (
                     <Card key={city.id}>
                       <CardHeader className="bg-blue-50 pb-4">
                         <div className="flex items-center justify-between">
